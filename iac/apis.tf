@@ -27,5 +27,6 @@ module "enabled_google_apis" {
     "notebooks.googleapis.com",
     "artifactregistry.googleapis.com",
     "dataflow.googleapis.com",
+    "cloudbuild.googleapis.com"
   ]
 }
