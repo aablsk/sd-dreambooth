@@ -66,6 +66,7 @@ def stablediffusion_dreambooth_pipeline(
     training_machine_type: str,
     training_accelerator_type: str,
     training_accelerator_count: int,
+    serving_service_account: str,
     class_prompt: str = "",
     #parent_model: str = None,
     model_name: str = "CompVis/stable-diffusion-v1-4",
@@ -110,6 +111,23 @@ def stablediffusion_dreambooth_pipeline(
         accelerator_count = training_accelerator_count,
         boot_disk_type = "pd-ssd",
         boot_disk_size_gb = 100,
+    )
+
+    endpoint_create_op = gcc_aip.EndpointCreateOp(
+        project = project_id,
+        location = location,
+        display_name = pipeline_identifier
+    )
+
+    gcc_aip.ModelDeployOp(
+        model = fine_tuning_job.outputs["model"],
+        endpoint = endpoint_create_op.outputs["endpoint"],
+        dedicated_resources_min_replica_count = 1,
+        dedicated_resources_max_replica_count = 1,
+        dedicated_resources_machine_type = "n1-standard-4",
+        dedicated_resources_accelerator_type = "NVIDIA_TESTLA_T4",
+        dedicated_resources_accelerator_count = 1,
+        service_account = serving_service_account
     )
 
 compiler.Compiler().compile(pipeline_func=stablediffusion_dreambooth_pipeline,
