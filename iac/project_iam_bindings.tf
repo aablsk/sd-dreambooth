@@ -24,5 +24,8 @@ module "project-iam-bindings" {
         "serviceAccount:${google_service_account.vertexai_prediction.email}",
         "serviceAccount:${google_service_account.cloudbuild.email}",
     ],
+    "roles/aiplatform.admin" = [
+        "serviceAccount:${google_service_account.vertexai_training.email}", # should probably be done with more restrictive permissions
+    ]
   }
 }
