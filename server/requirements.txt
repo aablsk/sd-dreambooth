@@ -1,0 +1,7 @@
+bentoml>=1.0.0
+torch
+transformers
+diffusers
+ftfy
+pydantic
+gcloud

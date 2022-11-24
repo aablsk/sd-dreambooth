@@ -1,0 +1,671 @@
+{
+  "pipelineSpec": {
+    "components": {
+      "comp-build-base-output-dir": {
+        "executorLabel": "exec-build-base-output-dir",
+        "inputDefinitions": {
+          "parameters": {
+            "output_bucket": {
+              "type": "STRING"
+            },
+            "pipeline_instance_identifier": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-build-labels": {
+        "executorLabel": "exec-build-labels",
+        "inputDefinitions": {
+          "parameters": {
+            "class_prompt": {
+              "type": "STRING"
+            },
+            "input_bucket": {
+              "type": "STRING"
+            },
+            "instance_prompt": {
+              "type": "STRING"
+            },
+            "model_name": {
+              "type": "STRING"
+            },
+            "timestamp": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-build-model-description": {
+        "executorLabel": "exec-build-model-description",
+        "inputDefinitions": {
+          "parameters": {
+            "class_prompt": {
+              "type": "STRING"
+            },
+            "input_bucket": {
+              "type": "STRING"
+            },
+            "instance_prompt": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-build-serving-env": {
+        "executorLabel": "exec-build-serving-env",
+        "inputDefinitions": {
+          "parameters": {
+            "project_id": {
+              "type": "STRING"
+            },
+            "serving_output_bucket": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-build-training-env": {
+        "executorLabel": "exec-build-training-env",
+        "inputDefinitions": {
+          "parameters": {
+            "access_token": {
+              "type": "STRING"
+            },
+            "class_prompt": {
+              "type": "STRING"
+            },
+            "input_bucket": {
+              "type": "STRING"
+            },
+            "instance_prompt": {
+              "type": "STRING"
+            },
+            "model_name": {
+              "type": "STRING"
+            },
+            "output_bucket": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-customcontainertrainingjob-run": {
+        "executorLabel": "exec-customcontainertrainingjob-run",
+        "inputDefinitions": {
+          "parameters": {
+            "accelerator_count": {
+              "type": "INT"
+            },
+            "accelerator_type": {
+              "type": "STRING"
+            },
+            "base_output_dir": {
+              "type": "STRING"
+            },
+            "container_uri": {
+              "type": "STRING"
+            },
+            "environment_variables": {
+              "type": "STRING"
+            },
+            "location": {
+              "type": "STRING"
+            },
+            "machine_type": {
+              "type": "STRING"
+            },
+            "model_description": {
+              "type": "STRING"
+            },
+            "model_serving_container_command": {
+              "type": "STRING"
+            },
+            "model_serving_container_environment_variables": {
+              "type": "STRING"
+            },
+            "model_serving_container_image_uri": {
+              "type": "STRING"
+            },
+            "model_serving_container_ports": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "service_account": {
+              "type": "STRING"
+            },
+            "staging_bucket": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "model": {
+              "artifactType": {
+                "schemaTitle": "google.VertexModel",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "deploymentSpec": {
+      "executors": {
+        "exec-build-base-output-dir": {
+          "container": {
+            "args": [
+              "--output-bucket",
+              "{{$.inputs.parameters['output_bucket']}}",
+              "--pipeline-instance-identifier",
+              "{{$.inputs.parameters['pipeline_instance_identifier']}}",
+              "----output-paths",
+              "{{$.outputs.parameters['Output'].output_file}}"
+            ],
+            "command": [
+              "sh",
+              "-ec",
+              "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+              "def build_base_output_dir(output_bucket, pipeline_instance_identifier):\n    return \"{}/{}/\".format(output_bucket, pipeline_instance_identifier)\n\ndef _serialize_str(str_value: str) -> str:\n    if not isinstance(str_value, str):\n        raise TypeError('Value \"{}\" has type \"{}\" instead of str.'.format(\n            str(str_value), str(type(str_value))))\n    return str_value\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Build base output dir', description='')\n_parser.add_argument(\"--output-bucket\", dest=\"output_bucket\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--pipeline-instance-identifier\", dest=\"pipeline_instance_identifier\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"----output-paths\", dest=\"_output_paths\", type=str, nargs=1)\n_parsed_args = vars(_parser.parse_args())\n_output_files = _parsed_args.pop(\"_output_paths\", [])\n\n_outputs = build_base_output_dir(**_parsed_args)\n\n_outputs = [_outputs]\n\n_output_serializers = [\n    _serialize_str,\n\n]\n\nimport os\nfor idx, output_file in enumerate(_output_files):\n    try:\n        os.makedirs(os.path.dirname(output_file))\n    except OSError:\n        pass\n    with open(output_file, 'w') as f:\n        f.write(_output_serializers[idx](_outputs[idx]))\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-build-labels": {
+          "container": {
+            "args": [
+              "--model-name",
+              "{{$.inputs.parameters['model_name']}}",
+              "--instance-prompt",
+              "{{$.inputs.parameters['instance_prompt']}}",
+              "--class-prompt",
+              "{{$.inputs.parameters['class_prompt']}}",
+              "--input-bucket",
+              "{{$.inputs.parameters['input_bucket']}}",
+              "--timestamp",
+              "{{$.inputs.parameters['timestamp']}}",
+              "----output-paths",
+              "{{$.outputs.parameters['Output'].output_file}}"
+            ],
+            "command": [
+              "sh",
+              "-ec",
+              "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+              "def build_labels(model_name, instance_prompt, class_prompt, input_bucket, timestamp):\n    import json\n    import re\n    def clean_str(string):\n        return re.sub(r'[^A-Za-z0-9\\_\\-]', '', string)\n\n    return json.dumps({\n        \"base_model\": clean_str(model_name),\n        \"instance_prompt\": clean_str(instance_prompt),\n        \"class_prompt\": clean_str(class_prompt),\n        \"instance_images\": clean_str(input_bucket),\n        \"timestamp\": clean_str(timestamp),\n    })\n\ndef _serialize_str(str_value: str) -> str:\n    if not isinstance(str_value, str):\n        raise TypeError('Value \"{}\" has type \"{}\" instead of str.'.format(\n            str(str_value), str(type(str_value))))\n    return str_value\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Build labels', description='')\n_parser.add_argument(\"--model-name\", dest=\"model_name\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--instance-prompt\", dest=\"instance_prompt\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--class-prompt\", dest=\"class_prompt\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--input-bucket\", dest=\"input_bucket\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--timestamp\", dest=\"timestamp\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"----output-paths\", dest=\"_output_paths\", type=str, nargs=1)\n_parsed_args = vars(_parser.parse_args())\n_output_files = _parsed_args.pop(\"_output_paths\", [])\n\n_outputs = build_labels(**_parsed_args)\n\n_outputs = [_outputs]\n\n_output_serializers = [\n    _serialize_str,\n\n]\n\nimport os\nfor idx, output_file in enumerate(_output_files):\n    try:\n        os.makedirs(os.path.dirname(output_file))\n    except OSError:\n        pass\n    with open(output_file, 'w') as f:\n        f.write(_output_serializers[idx](_outputs[idx]))\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-build-model-description": {
+          "container": {
+            "args": [
+              "--input-bucket",
+              "{{$.inputs.parameters['input_bucket']}}",
+              "--instance-prompt",
+              "{{$.inputs.parameters['instance_prompt']}}",
+              "--class-prompt",
+              "{{$.inputs.parameters['class_prompt']}}",
+              "----output-paths",
+              "{{$.outputs.parameters['Output'].output_file}}"
+            ],
+            "command": [
+              "sh",
+              "-ec",
+              "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+              "def build_model_description(input_bucket, instance_prompt, class_prompt):\n    return \"StableDiffusion Dreambooth fine-tuned on {} images with instance_prompt {} and class_prompt {}.\".format(input_bucket, instance_prompt, class_prompt)\n\ndef _serialize_str(str_value: str) -> str:\n    if not isinstance(str_value, str):\n        raise TypeError('Value \"{}\" has type \"{}\" instead of str.'.format(\n            str(str_value), str(type(str_value))))\n    return str_value\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Build model description', description='')\n_parser.add_argument(\"--input-bucket\", dest=\"input_bucket\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--instance-prompt\", dest=\"instance_prompt\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--class-prompt\", dest=\"class_prompt\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"----output-paths\", dest=\"_output_paths\", type=str, nargs=1)\n_parsed_args = vars(_parser.parse_args())\n_output_files = _parsed_args.pop(\"_output_paths\", [])\n\n_outputs = build_model_description(**_parsed_args)\n\n_outputs = [_outputs]\n\n_output_serializers = [\n    _serialize_str,\n\n]\n\nimport os\nfor idx, output_file in enumerate(_output_files):\n    try:\n        os.makedirs(os.path.dirname(output_file))\n    except OSError:\n        pass\n    with open(output_file, 'w') as f:\n        f.write(_output_serializers[idx](_outputs[idx]))\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-build-serving-env": {
+          "container": {
+            "args": [
+              "--project-id",
+              "{{$.inputs.parameters['project_id']}}",
+              "--serving-output-bucket",
+              "{{$.inputs.parameters['serving_output_bucket']}}",
+              "----output-paths",
+              "{{$.outputs.parameters['Output'].output_file}}"
+            ],
+            "command": [
+              "sh",
+              "-ec",
+              "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+              "def build_serving_env(project_id, serving_output_bucket):\n    import json\n    return json.dumps({\n        \"PROJECT_ID\": project_id,\n        \"BUCKET\": serving_output_bucket,\n    })\n\ndef _serialize_str(str_value: str) -> str:\n    if not isinstance(str_value, str):\n        raise TypeError('Value \"{}\" has type \"{}\" instead of str.'.format(\n            str(str_value), str(type(str_value))))\n    return str_value\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Build serving env', description='')\n_parser.add_argument(\"--project-id\", dest=\"project_id\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--serving-output-bucket\", dest=\"serving_output_bucket\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"----output-paths\", dest=\"_output_paths\", type=str, nargs=1)\n_parsed_args = vars(_parser.parse_args())\n_output_files = _parsed_args.pop(\"_output_paths\", [])\n\n_outputs = build_serving_env(**_parsed_args)\n\n_outputs = [_outputs]\n\n_output_serializers = [\n    _serialize_str,\n\n]\n\nimport os\nfor idx, output_file in enumerate(_output_files):\n    try:\n        os.makedirs(os.path.dirname(output_file))\n    except OSError:\n        pass\n    with open(output_file, 'w') as f:\n        f.write(_output_serializers[idx](_outputs[idx]))\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-build-training-env": {
+          "container": {
+            "args": [
+              "--input-bucket",
+              "{{$.inputs.parameters['input_bucket']}}",
+              "--output-bucket",
+              "{{$.inputs.parameters['output_bucket']}}",
+              "--instance-prompt",
+              "{{$.inputs.parameters['instance_prompt']}}",
+              "--class-prompt",
+              "{{$.inputs.parameters['class_prompt']}}",
+              "--model-name",
+              "{{$.inputs.parameters['model_name']}}",
+              "--access-token",
+              "{{$.inputs.parameters['access_token']}}",
+              "----output-paths",
+              "{{$.outputs.parameters['Output'].output_file}}"
+            ],
+            "command": [
+              "sh",
+              "-ec",
+              "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+              "def build_training_env(input_bucket, output_bucket, instance_prompt, class_prompt, model_name, access_token):\n    import json\n    return json.dumps({\n        \"INPUT_BUCKET\": input_bucket,\n        \"OUTPUT_BUCKET\": output_bucket,\n        \"INSTANCE_PROMPT\": instance_prompt,\n        \"CLASS_PROMPT\": class_prompt,\n        \"MODEL_NAME\": model_name,\n        \"ACCESS_TOKEN\": access_token\n    })\n\ndef _serialize_str(str_value: str) -> str:\n    if not isinstance(str_value, str):\n        raise TypeError('Value \"{}\" has type \"{}\" instead of str.'.format(\n            str(str_value), str(type(str_value))))\n    return str_value\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Build training env', description='')\n_parser.add_argument(\"--input-bucket\", dest=\"input_bucket\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--output-bucket\", dest=\"output_bucket\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--instance-prompt\", dest=\"instance_prompt\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--class-prompt\", dest=\"class_prompt\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--model-name\", dest=\"model_name\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--access-token\", dest=\"access_token\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"----output-paths\", dest=\"_output_paths\", type=str, nargs=1)\n_parsed_args = vars(_parser.parse_args())\n_output_files = _parsed_args.pop(\"_output_paths\", [])\n\n_outputs = build_training_env(**_parsed_args)\n\n_outputs = [_outputs]\n\n_output_serializers = [\n    _serialize_str,\n\n]\n\nimport os\nfor idx, output_file in enumerate(_output_files):\n    try:\n        os.makedirs(os.path.dirname(output_file))\n    except OSError:\n        pass\n    with open(output_file, 'w') as f:\n        f.write(_output_serializers[idx](_outputs[idx]))\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-customcontainertrainingjob-run": {
+          "container": {
+            "args": [
+              "--init.display_name",
+              "training-pipeline_stablediffusion-dreambooth_2022_11_24__17_07_30",
+              "--init.model_serving_container_predict_route",
+              "/txt2img",
+              "--init.model_serving_container_health_route",
+              "/healthz",
+              "--method.model_display_name",
+              "stablediffusion-dreambooth",
+              "--method.is_default_version",
+              "True",
+              "--method.model_version_description",
+              "stablediffusion-dreambooth_2022_11_24__17_07_30",
+              "--method.replica_count",
+              "1",
+              "--method.boot_disk_type",
+              "pd-ssd",
+              "--method.boot_disk_size_gb",
+              "100",
+              "--executor_input",
+              "{{$}}",
+              "--resource_name_output_artifact_uri",
+              "{{$.outputs.artifacts['model'].uri}}",
+              "--init.container_uri",
+              "{{$.inputs.parameters['container_uri']}}",
+              "--init.model_serving_container_image_uri",
+              "{{$.inputs.parameters['model_serving_container_image_uri']}}",
+              "--init.model_serving_container_command",
+              "{{$.inputs.parameters['model_serving_container_command']}}",
+              "--init.model_serving_container_environment_variables",
+              "{{$.inputs.parameters['model_serving_container_environment_variables']}}",
+              "--init.model_serving_container_ports",
+              "{{$.inputs.parameters['model_serving_container_ports']}}",
+              "--init.model_description",
+              "{{$.inputs.parameters['model_description']}}",
+              "--init.project",
+              "{{$.inputs.parameters['project']}}",
+              "--init.location",
+              "{{$.inputs.parameters['location']}}",
+              "--init.staging_bucket",
+              "{{$.inputs.parameters['staging_bucket']}}",
+              "--method.base_output_dir",
+              "{{$.inputs.parameters['base_output_dir']}}",
+              "--method.service_account",
+              "{{$.inputs.parameters['service_account']}}",
+              "--method.environment_variables",
+              "{{$.inputs.parameters['environment_variables']}}",
+              "--method.machine_type",
+              "{{$.inputs.parameters['machine_type']}}",
+              "--method.accelerator_type",
+              "{{$.inputs.parameters['accelerator_type']}}",
+              "--method.accelerator_count",
+              "{{$.inputs.parameters['accelerator_count']}}"
+            ],
+            "command": [
+              "python3",
+              "-m",
+              "google_cloud_pipeline_components.container.aiplatform.remote_runner",
+              "--cls_name",
+              "CustomContainerTrainingJob",
+              "--method_name",
+              "run"
+            ],
+            "image": "gcr.io/ml-pipeline/google-cloud-pipeline-components:1.0.27"
+          }
+        }
+      }
+    },
+    "pipelineInfo": {
+      "name": "stablediffusion-dreambooth"
+    },
+    "root": {
+      "dag": {
+        "tasks": {
+          "build-base-output-dir": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-build-base-output-dir"
+            },
+            "inputs": {
+              "parameters": {
+                "output_bucket": {
+                  "componentInputParameter": "output_bucket"
+                },
+                "pipeline_instance_identifier": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "stablediffusion-dreambooth_2022_11_24__17_07_30"
+                    }
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "build-base-output-dir"
+            }
+          },
+          "build-labels": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-build-labels"
+            },
+            "inputs": {
+              "parameters": {
+                "class_prompt": {
+                  "componentInputParameter": "class_prompt"
+                },
+                "input_bucket": {
+                  "componentInputParameter": "input_bucket"
+                },
+                "instance_prompt": {
+                  "componentInputParameter": "instance_prompt"
+                },
+                "model_name": {
+                  "componentInputParameter": "model_name"
+                },
+                "timestamp": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "2022_11_24__17_07_30"
+                    }
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "build-labels"
+            }
+          },
+          "build-model-description": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-build-model-description"
+            },
+            "inputs": {
+              "parameters": {
+                "class_prompt": {
+                  "componentInputParameter": "class_prompt"
+                },
+                "input_bucket": {
+                  "componentInputParameter": "input_bucket"
+                },
+                "instance_prompt": {
+                  "componentInputParameter": "instance_prompt"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "build-model-description"
+            }
+          },
+          "build-serving-env": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-build-serving-env"
+            },
+            "inputs": {
+              "parameters": {
+                "project_id": {
+                  "componentInputParameter": "project_id"
+                },
+                "serving_output_bucket": {
+                  "componentInputParameter": "serving_output_bucket"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "build-serving-env"
+            }
+          },
+          "build-training-env": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-build-training-env"
+            },
+            "inputs": {
+              "parameters": {
+                "access_token": {
+                  "componentInputParameter": "access_token"
+                },
+                "class_prompt": {
+                  "componentInputParameter": "class_prompt"
+                },
+                "input_bucket": {
+                  "componentInputParameter": "input_bucket"
+                },
+                "instance_prompt": {
+                  "componentInputParameter": "instance_prompt"
+                },
+                "model_name": {
+                  "componentInputParameter": "model_name"
+                },
+                "output_bucket": {
+                  "componentInputParameter": "output_bucket"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "build-training-env"
+            }
+          },
+          "customcontainertrainingjob-run": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-customcontainertrainingjob-run"
+            },
+            "dependentTasks": [
+              "build-base-output-dir",
+              "build-model-description",
+              "build-serving-env",
+              "build-training-env"
+            ],
+            "inputs": {
+              "parameters": {
+                "accelerator_count": {
+                  "componentInputParameter": "training_accelerator_count"
+                },
+                "accelerator_type": {
+                  "componentInputParameter": "training_accelerator_type"
+                },
+                "base_output_dir": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-base-output-dir"
+                  }
+                },
+                "container_uri": {
+                  "componentInputParameter": "training_container_uri"
+                },
+                "environment_variables": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-training-env"
+                  }
+                },
+                "location": {
+                  "componentInputParameter": "location"
+                },
+                "machine_type": {
+                  "componentInputParameter": "training_machine_type"
+                },
+                "model_description": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-model-description"
+                  }
+                },
+                "model_serving_container_command": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[\"serve\", \"production\"]"
+                    }
+                  }
+                },
+                "model_serving_container_environment_variables": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-serving-env"
+                  }
+                },
+                "model_serving_container_image_uri": {
+                  "componentInputParameter": "serving_container_uri"
+                },
+                "model_serving_container_ports": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[3000]"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project_id"
+                },
+                "service_account": {
+                  "componentInputParameter": "service_account"
+                },
+                "staging_bucket": {
+                  "componentInputParameter": "staging_bucket"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "customcontainertrainingjob-run"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "parameters": {
+          "access_token": {
+            "type": "STRING"
+          },
+          "class_prompt": {
+            "type": "STRING"
+          },
+          "input_bucket": {
+            "type": "STRING"
+          },
+          "instance_prompt": {
+            "type": "STRING"
+          },
+          "location": {
+            "type": "STRING"
+          },
+          "model_name": {
+            "type": "STRING"
+          },
+          "output_bucket": {
+            "type": "STRING"
+          },
+          "project_id": {
+            "type": "STRING"
+          },
+          "service_account": {
+            "type": "STRING"
+          },
+          "serving_container_uri": {
+            "type": "STRING"
+          },
+          "serving_output_bucket": {
+            "type": "STRING"
+          },
+          "staging_bucket": {
+            "type": "STRING"
+          },
+          "training_accelerator_count": {
+            "type": "INT"
+          },
+          "training_accelerator_type": {
+            "type": "STRING"
+          },
+          "training_container_uri": {
+            "type": "STRING"
+          },
+          "training_machine_type": {
+            "type": "STRING"
+          }
+        }
+      }
+    },
+    "schemaVersion": "2.0.0",
+    "sdkVersion": "kfp-1.8.16"
+  },
+  "runtimeConfig": {
+    "parameters": {
+      "class_prompt": {
+        "stringValue": ""
+      },
+      "model_name": {
+        "stringValue": "CompVis/stable-diffusion-v1-4"
+      }
+    }
+  }
+}

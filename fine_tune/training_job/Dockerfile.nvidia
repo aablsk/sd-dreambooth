@@ -1,0 +1,28 @@
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+
+# Installs necessary dependencies.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+         wget \
+         curl \
+         python3.10 \
+         python3.10-venv && \
+     rm -rf /var/lib/apt/lists/*
+
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && apt-get update -y && apt-get install google-cloud-cli -y
+
+WORKDIR /trainer
+
+# install gcloud (gsutil)
+COPY requirements.txt .
+RUN python3.10 -m venv venv && . venv/bin/activate
+RUN pip install -U -r requirements.txt
+
+RUN mkdir ./instance-images
+
+COPY accelerate_config.yaml .
+COPY train_dreambooth.py .
+COPY train.sh .
+
+ENTRYPOINT ["./train.sh"]
