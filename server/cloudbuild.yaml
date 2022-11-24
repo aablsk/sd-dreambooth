@@ -20,7 +20,7 @@ steps:
       python -m venv venv && . venv/bin/activate
       pip install -U -r requirements.txt
       bentoml build
-      bentoml containerize stable_diffusion_service:latest -t $LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/bentoml-server-no-model
+      bentoml containerize stable_diffusion_service:latest -t $$LOCATION-docker.pkg.dev/$$PROJECT_ID/$$_REPO_NAME/bentoml-server-no-model
 images: ['$LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/bentoml-server-no-model']
 options:
   logging: CLOUD_LOGGING_ONLY
