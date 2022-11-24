@@ -14,7 +14,7 @@
 
 steps:
   - name: gcr.io/cloud-builders/docker
-    args: ['build', '-t $LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/finetune-16gb-prebuilt', 'fine_tune/training_job']
+    args: ['build', '-t', '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/finetune-16gb-prebuilt', 'fine_tune/training_job']
 images: ['$LOCATION-docker.pkg.dev/$PROJECT_ID/stablediffusion-dreambooth/finetune-16gb-prebuilt']
 options:
   logging: CLOUD_LOGGING_ONLY
