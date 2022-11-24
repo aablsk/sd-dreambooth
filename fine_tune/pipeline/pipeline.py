@@ -37,6 +37,7 @@ def build_serving_env(project_id: str, serving_output_bucket: str) -> str:
     return json.dumps({
         "PROJECT_ID": project_id,
         "BUCKET": serving_output_bucket,
+        "MODEL_PATH": "/home/bentoml/bento/src/model"
     })
 
 @kfp.components.create_component_from_func
