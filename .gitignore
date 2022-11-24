@@ -2,3 +2,4 @@
 env_*
 terraform.tfvars
 terraform.tfstate*
+env.sh
