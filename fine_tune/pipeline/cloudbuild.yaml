@@ -21,6 +21,6 @@ steps:
       pip install -U -r requirements.txt
       python pipeline.py
   - name: gcr.io/cloud-builders/gsutil # get skaffold build cache
-    args: ['cp', "stablediffusion_dreambooth_pipeline.json", '$_PIPELINE_BUCKET/']
+    args: ['cp', "fine_tune/pipeline/stablediffusion_dreambooth_pipeline.json", '$_PIPELINE_BUCKET/']
 options:
   logging: CLOUD_LOGGING_ONLY
