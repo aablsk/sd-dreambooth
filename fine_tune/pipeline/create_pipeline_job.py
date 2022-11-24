@@ -3,13 +3,14 @@ from google.cloud import aiplatform
 
 project_id = "sd-db-tf"
 location = "europe-west1"
-staging_bucket = "gs://vertexai_pipeline_staging_${project_id}"
-input_bucket = "gs://instance_images_dog_${project_id}"
-output_bucket ="gs://stable-diffusion-dreambooth-models_${project_id}"
+staging_bucket = "gs://vertexai_pipeline_staging_{}".format(project_id)
+input_bucket = "gs://instance_images_dog_{}".format(project_id)
+output_bucket ="gs://stable-diffusion-dreambooth-models_{}".format(project_id)
 instance_prompt="\"a photo of sks dog\""
 access_token=os.environ['ACCESS_TOKEN'] #consider getting this from secret manager!
-serving_output_bucket="render-results_${project_id}"
-training_service_account="vertexai-training@${project_id}.iam.gserviceaccount.com"
+serving_output_bucket="render-results_{}".format(project_id)
+training_service_account="vertexai-training@{}.iam.gserviceaccount.com".format(project_id)
+serving_service_account="vertexai-prediction@{}.iam.gserviceaccount.com".format(project_id)
 
 aiplatform.init(project=project_id, location=location, staging_bucket=staging_bucket)
 
@@ -35,9 +36,10 @@ job = aiplatform.PipelineJob(
         "class_prompt": "\"a photo of dog\"",
         #"parent_model": None,
         "model_name": "CompVis/stable-diffusion-v1-4",
+        "serving_service_account": serving_service_account
     },
     project = project_id,
     location = location,
 )
 
-#job.submit(service_account=training_service_account)
+job.submit(service_account=training_service_account)
