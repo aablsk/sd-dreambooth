@@ -126,7 +126,7 @@ def stablediffusion_dreambooth_pipeline(
         dedicated_resources_min_replica_count = 1,
         dedicated_resources_max_replica_count = 1,
         dedicated_resources_machine_type = "n1-standard-4",
-        dedicated_resources_accelerator_type = "NVIDIA_TESTLA_T4",
+        dedicated_resources_accelerator_type = "NVIDIA_TESLA_T4",
         dedicated_resources_accelerator_count = 1,
         service_account = serving_service_account
     )
