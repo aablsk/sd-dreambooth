@@ -25,9 +25,9 @@ mkdir $OUTPUT_DIR
 
 gsutil -m cp -r $INPUT_BUCKET/* $INSTANCE_DIR # TODO: consider if we want to put this into the training script
 
+# TODO: get all of below args from an ENV_VAR instead so we can easily pass them when we create a training job
 accelerate launch --config_file=accelerate_config.yaml \ 
   train_dreambooth.py \
-  # TODO: get all of below args from an ENV_VAR instead so we can easily pass them when we create a training job
   --pretrained_model_name_or_path="$MODEL_NAME"  \
   --instance_data_dir="$INSTANCE_DIR" \
   --class_data_dir=$CLASS_DIR \
