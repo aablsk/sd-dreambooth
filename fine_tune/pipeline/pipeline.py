@@ -105,7 +105,7 @@ def stablediffusion_dreambooth_pipeline(
     base_output_dir = build_base_output_dir(output_bucket, input_bucket, instance_prompt, class_prompt).outputs['Output']
 
     fine_tuning_job = gcc_aip.CustomContainerTrainingJobRunOp(
-        display_name = "training-pipeline_{}".format(base_output_dir),
+        display_name = "training-pipeline_{}".format(base_output_dir), # TODO: figure out why this doesn't work
         container_uri = training_container_uri,
         model_serving_container_image_uri = serving_container_uri,
         model_serving_container_predict_route = "/txt2img",
