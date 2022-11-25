@@ -25,7 +25,7 @@ module "project-iam-bindings" {
         "serviceAccount:${google_service_account.cloudbuild.email}",
     ],
     "roles/aiplatform.admin" = [
-        "serviceAccount:${google_service_account.vertexai_training.email}", # should probably be done with more restrictive permissions
+        "serviceAccount:${google_service_account.vertexai_training.email}", # TODO: determine and assign minimal permissions
     ]
   }
 }

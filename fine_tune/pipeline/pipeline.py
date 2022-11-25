@@ -1,3 +1,17 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import kfp
 from kfp.v2 import compiler
 from google.cloud import aiplatform
@@ -49,6 +63,9 @@ def build_model_description(input_bucket: str, instance_prompt: str, class_promp
 def build_base_output_dir(output_bucket: str, pipeline_instance_identifier: str) -> str:
     return "{}/{}/".format(output_bucket, pipeline_instance_identifier)
 
+# TODO: refactor params
+# TODO: make injection of train_dreambooth.py script params easier by passing them from higher in the chain
+# TODO: refactor how identifiers are built to ensure proper caching (possibly makes sense to check when last changes to instance image buckets were done)
 @kfp.dsl.pipeline(
     name="stablediffusion-dreambooth",
 )
@@ -59,7 +76,7 @@ def stablediffusion_dreambooth_pipeline(
     input_bucket: str,
     output_bucket: str,
     instance_prompt: str,
-    access_token: str, #consider getting this from secret manager?
+    access_token: str,
     training_container_uri: str,
     serving_container_uri: str,
     serving_output_bucket: str,

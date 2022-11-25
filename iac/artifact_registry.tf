@@ -32,7 +32,7 @@ module "artifact-registry-repository-iam-bindings" {
   project      = var.project_id
   repositories = [local.app_name]
   location     = var.region
-  mode         = "authoritative"
+  mode         = "authoritative" # needs to be authoritative due to terraform limitations
 
   bindings = {
     "roles/artifactregistry.reader" = [

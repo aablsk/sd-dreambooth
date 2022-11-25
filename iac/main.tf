@@ -24,7 +24,3 @@ provider "google-beta" {
 provider "google" {
   region = var.region
 }
-
-# data needed for kubernetes provider
-data "google_client_config" "default" {}
-
