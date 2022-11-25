@@ -97,7 +97,7 @@ def stablediffusion_dreambooth_pipeline(
     pipeline_identifier = "stablediffusion-dreambooth"
     # pipeline_instance_identifier = "{}_{}".format(pipeline_identifier, timestamp)
 
-    labels = build_labels(model_name=model_name, instance_prompt=instance_prompt, class_prompt=class_prompt, input_bucket=input_bucket, timestamp=timestamp).outputs['Output']
+    #labels = build_labels(model_name=model_name, instance_prompt=instance_prompt, class_prompt=class_prompt, input_bucket=input_bucket, timestamp=timestamp).outputs['Output']
     training_env = build_training_env(input_bucket=input_bucket, output_bucket=output_bucket, instance_prompt=instance_prompt, class_prompt=class_prompt, model_name=model_name, access_token=access_token).outputs['Output']
     serving_env = build_serving_env(project_id=project_id, serving_output_bucket=serving_output_bucket).outputs['Output']
 
