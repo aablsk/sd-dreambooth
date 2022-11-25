@@ -60,8 +60,11 @@ def build_model_description(input_bucket: str, instance_prompt: str, class_promp
 
 
 @kfp.components.create_component_from_func
-def build_base_output_dir(output_bucket: str, pipeline_instance_identifier: str) -> str:
-    return "{}/{}/".format(output_bucket, pipeline_instance_identifier)
+def build_base_output_dir(output_bucket: str, input_bucket: str, instance_prompt: str, class_prompt: str) -> str:
+    import re
+    def clean_str(string: str):
+        return re.sub(r'[^A-Za-z0-9\_\-]', '', string)
+    return "{}/{}_{}_{}/".format(output_bucket, clean_str(input_bucket), clean_str(instance_prompt), clean_str(class_prompt))
 
 # TODO: refactor params
 # TODO: make injection of train_dreambooth.py script params easier by passing them from higher in the chain
@@ -92,17 +95,17 @@ def stablediffusion_dreambooth_pipeline(
 
     timestamp = dt.now().strftime("%Y_%m_%d__%H_%M_%S")
     pipeline_identifier = "stablediffusion-dreambooth"
-    pipeline_instance_identifier = "{}_{}".format(pipeline_identifier, timestamp)
+    # pipeline_instance_identifier = "{}_{}".format(pipeline_identifier, timestamp)
 
     labels = build_labels(model_name=model_name, instance_prompt=instance_prompt, class_prompt=class_prompt, input_bucket=input_bucket, timestamp=timestamp).outputs['Output']
     training_env = build_training_env(input_bucket=input_bucket, output_bucket=output_bucket, instance_prompt=instance_prompt, class_prompt=class_prompt, model_name=model_name, access_token=access_token).outputs['Output']
     serving_env = build_serving_env(project_id=project_id, serving_output_bucket=serving_output_bucket).outputs['Output']
 
     model_description = build_model_description(input_bucket, instance_prompt, class_prompt).outputs['Output']
-    base_output_dir = build_base_output_dir(output_bucket, pipeline_instance_identifier).outputs['Output']
+    base_output_dir = build_base_output_dir(output_bucket, input_bucket, instance_prompt, class_prompt).outputs['Output']
 
     fine_tuning_job = gcc_aip.CustomContainerTrainingJobRunOp(
-        display_name = "training-pipeline_{}".format(pipeline_instance_identifier),
+        display_name = "training-pipeline_{}".format(base_output_dir),
         container_uri = training_container_uri,
         model_serving_container_image_uri = serving_container_uri,
         model_serving_container_predict_route = "/txt2img",
@@ -119,7 +122,7 @@ def stablediffusion_dreambooth_pipeline(
         #model_labels = labels,
         #parent_model = parent_model,
         is_default_version = True,
-        model_version_description = pipeline_instance_identifier,
+        model_version_description = model_description,
         base_output_dir = base_output_dir,
         service_account = service_account,
         environment_variables = training_env,
