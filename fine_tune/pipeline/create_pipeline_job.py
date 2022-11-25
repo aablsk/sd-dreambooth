@@ -34,7 +34,7 @@ aiplatform.init(project=project_id, location=location, staging_bucket=staging_bu
 # TODO: consider better strategy for pipeline, job and model identifiers
 job = aiplatform.PipelineJob(
     display_name = "fine-tune-sd-db-pipeline",
-    template_path = "gs://vertexai_pipeline_definition_sd-db-tf/stablediffusion_dreambooth_pipeline.json",
+    template_path = "gs://vertexai_pipeline_definition_{}/stablediffusion_dreambooth_pipeline.json".format(project_id),
     pipeline_root = staging_bucket,
     parameter_values = {
         "project_id": project_id,

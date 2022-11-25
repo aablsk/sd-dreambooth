@@ -110,7 +110,7 @@ def stablediffusion_dreambooth_pipeline(
         model_serving_container_image_uri = serving_container_uri,
         model_serving_container_predict_route = "/txt2img",
         model_serving_container_health_route = "/healthz",
-        model_serving_container_command = ["serve", "production"],
+        model_serving_container_command = [],
         model_serving_container_environment_variables = serving_env,
         model_serving_container_ports = [3000],
         model_description = model_description,
