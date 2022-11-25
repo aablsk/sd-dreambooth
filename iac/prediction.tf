@@ -32,3 +32,9 @@ resource "google_storage_bucket_iam_member" "prediction_results" {
   member = "serviceAccount:${google_service_account.vertexai_prediction.email}"
   role   = "roles/storage.admin"
 }
+
+resource "google_service_account_iam_member" "vertexai_training_impersonate_prediction" {
+  service_account_id = google_service_account.vertexai_prediction.id
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.vertexai_training.email}"
+}
