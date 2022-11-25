@@ -174,12 +174,12 @@ class Instances(BaseModel):
 class Txt2ImgInput(BaseModel):
     instances: List[Instances]    
 
-@svc.api(input=JSON(pydantic_model=Txt2ImgInput), output=JSON())
+@svc.api(input=JSON(pydantic_model=Txt2ImgInput), output=JSON()) # TODO: expose more parameters for higher configurability
 def txt2img(data, context):
     data = data.instances[0].dict()
     data['seed'] = generate_seed_if_needed(data['seed'])
-    print(data.get('prompt'))
-    print(str(data))
+    print(data.get('prompt')) # TODO: remove these debug log statements
+    print(str(data)) # TODO: remove these debug log statements
     prompt = data.get('prompt')
     image = stable_diffusion_runner.txt2img.run(data)
     for i in data:
@@ -195,7 +195,7 @@ class Img2ImgInput(BaseModel):
     safety_check: bool = True
     seed: int = None
 
-img2img_input_spec = Multipart(img=Image(), data=JSON(pydantic_model=Img2ImgInput))
+img2img_input_spec = Multipart(img=Image(), data=JSON(pydantic_model=Img2ImgInput)) # TODO: needs to be reworked to work with VertexAI endpoint REST structure like txt2img()
 @svc.api(input=img2img_input_spec, output=Image())
 def img2img(img, data, context):
     data = data.dict()
@@ -205,7 +205,7 @@ def img2img(img, data, context):
         context.response.headers.append(i, str(data[i]))
     return image
 
-inpaint_input_spec = Multipart(img=Image(), mask=Image(), data=JSON(pydantic_model=Img2ImgInput))
+inpaint_input_spec = Multipart(img=Image(), mask=Image(), data=JSON(pydantic_model=Img2ImgInput)) # TODO: needs to be reworked to work with VertexAI endpoint REST structure like txt2img()
 @svc.api(input=inpaint_input_spec, output=Image())
 def inpaint(img, mask, data, context):
     data = data.dict()
