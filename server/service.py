@@ -100,7 +100,8 @@ class StableDiffusionRunnable(bentoml.Runnable):
                 generator=generator
             ).images
             image = images[0]
-            return image
+            link = self.upload_to_gcs(image, prompt)
+            return link
 
     @bentoml.Runnable.method(batchable=False, batch_dim=0)
     def img2img(self, init_image, data):
