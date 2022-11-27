@@ -36,21 +36,27 @@ from datetime import datetime as dt
 
 @kfp.components.create_component_from_func
 def build_training_env(input_bucket: str, access_token: str, accelerate_args: str, train_script: str,
-                       train_script_args: str) -> str:
+                       train_script_args: str, project_id: str) -> str:
     import json
     return json.dumps({
         "INPUT_BUCKET": input_bucket,
         "ACCESS_TOKEN": access_token,
-        "ACCELERATE_ARGS": f"{accelerate_args}",
+        "ACCELERATE_ARGS": accelerate_args.strip('\''),
         "TRAIN_SCRIPT": train_script,
-        "TRAIN_SCRIPT_ARGS": f"{train_script_args}"
+        "TRAIN_SCRIPT_ARGS": train_script_args.strip('\''),
+        "PROJECT_ID": project_id,
     })
 
 
 @kfp.components.create_component_from_func
-def build_serving_env(project_id: str, serving_output_bucket: str) -> str:
+def build_serving_env(project_id: str, serving_output_bucket: str, base_output_dir: str) -> str:
     import json
-    return json.dumps({"PROJECT_ID": project_id, "BUCKET": serving_output_bucket, "MODELS_PATH": "models"})
+    return json.dumps({
+        "PROJECT_ID": project_id,
+        "BUCKET": serving_output_bucket,
+        "MODELS_PATH": "models",
+        "GCS_MODEL_PATH": f"{base_output_dir}/model"
+    })
 
 
 @kfp.components.create_component_from_func
@@ -81,6 +87,7 @@ def stablediffusion_dreambooth_pipeline(
     output_bucket: str,
     access_token: str,
     service_account: str,
+    staging_bucket: str,
     training_machine_type: str,
     training_accelerator_type: str,
     training_accelerator_count: int,
@@ -96,11 +103,15 @@ def stablediffusion_dreambooth_pipeline(
         accelerate_args=accelerate_args,
         train_script=train_script,
         train_script_args=train_script_args,
+        project_id=project_id
     ).outputs['Output']
-    serving_env = build_serving_env(project_id=project_id,
-                                    serving_output_bucket=serving_output_bucket).outputs['Output']
     model_description = build_model_description(pipeline_identifier, train_script_args).outputs['Output']
     base_output_dir = build_base_output_dir(output_bucket, pipeline_identifier).outputs['Output']
+    serving_env = build_serving_env(
+        project_id=project_id,
+        serving_output_bucket=serving_output_bucket,
+        base_output_dir=base_output_dir,
+    ).outputs['Output']
 
     fine_tuning_job = gcc_aip.CustomContainerTrainingJobRunOp(
         display_name=pipeline_identifier,
@@ -124,11 +135,11 @@ def stablediffusion_dreambooth_pipeline(
         model_serving_container_environment_variables=serving_env,
         model_serving_container_ports=[3000],
         model_description=model_description,
-        parent_model = parent_model,
+        #parent_model=parent_model,
         #model_labels = labels,
         is_default_version=True,
         model_version_description=model_description,
-    )
+        staging_bucket=staging_bucket)
 
     endpoint_create_op = gcc_aip.EndpointCreateOp(project=project_id,
                                                   location=location,
