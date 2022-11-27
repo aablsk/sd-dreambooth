@@ -168,6 +168,7 @@ class StableDiffusionRunnable(bentoml.Runnable):
             return image
         
     def upload_to_gcs(self, image, prompt):
+        self.storage_client = storage.Client(os.environ['PROJECT_ID'])
         bucket = self.storage_client.get_bucket(os.environ['BUCKET'])
         blob_name = str(datetime.now().microsecond) + prompt + '.png'
         blob = bucket.blob(blob_name)
