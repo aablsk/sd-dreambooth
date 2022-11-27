@@ -1,0 +1,938 @@
+{
+  "pipelineSpec": {
+    "components": {
+      "comp-build-base-output-dir": {
+        "executorLabel": "exec-build-base-output-dir",
+        "inputDefinitions": {
+          "parameters": {
+            "output_bucket": {
+              "type": "STRING"
+            },
+            "pipeline_identifier": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-build-model-description": {
+        "executorLabel": "exec-build-model-description",
+        "inputDefinitions": {
+          "parameters": {
+            "pipeline_identifier": {
+              "type": "STRING"
+            },
+            "train_script_args": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-build-serving-env": {
+        "executorLabel": "exec-build-serving-env",
+        "inputDefinitions": {
+          "parameters": {
+            "base_output_dir": {
+              "type": "STRING"
+            },
+            "project_id": {
+              "type": "STRING"
+            },
+            "serving_output_bucket": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-build-training-env": {
+        "executorLabel": "exec-build-training-env",
+        "inputDefinitions": {
+          "parameters": {
+            "accelerate_args": {
+              "type": "STRING"
+            },
+            "access_token": {
+              "type": "STRING"
+            },
+            "input_bucket": {
+              "type": "STRING"
+            },
+            "project_id": {
+              "type": "STRING"
+            },
+            "train_script": {
+              "type": "STRING"
+            },
+            "train_script_args": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-customcontainertrainingjob-run": {
+        "executorLabel": "exec-customcontainertrainingjob-run",
+        "inputDefinitions": {
+          "parameters": {
+            "accelerator_count": {
+              "type": "INT"
+            },
+            "accelerator_type": {
+              "type": "STRING"
+            },
+            "base_output_dir": {
+              "type": "STRING"
+            },
+            "container_uri": {
+              "type": "STRING"
+            },
+            "display_name": {
+              "type": "STRING"
+            },
+            "environment_variables": {
+              "type": "STRING"
+            },
+            "location": {
+              "type": "STRING"
+            },
+            "machine_type": {
+              "type": "STRING"
+            },
+            "model_description": {
+              "type": "STRING"
+            },
+            "model_display_name": {
+              "type": "STRING"
+            },
+            "model_serving_container_command": {
+              "type": "STRING"
+            },
+            "model_serving_container_environment_variables": {
+              "type": "STRING"
+            },
+            "model_serving_container_image_uri": {
+              "type": "STRING"
+            },
+            "model_serving_container_ports": {
+              "type": "STRING"
+            },
+            "model_version_description": {
+              "type": "STRING"
+            },
+            "service_account": {
+              "type": "STRING"
+            },
+            "staging_bucket": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "model": {
+              "artifactType": {
+                "schemaTitle": "google.VertexModel",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-endpoint-create": {
+        "executorLabel": "exec-endpoint-create",
+        "inputDefinitions": {
+          "parameters": {
+            "description": {
+              "type": "STRING"
+            },
+            "display_name": {
+              "type": "STRING"
+            },
+            "encryption_spec_key_name": {
+              "type": "STRING"
+            },
+            "labels": {
+              "type": "STRING"
+            },
+            "location": {
+              "type": "STRING"
+            },
+            "network": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "endpoint": {
+              "artifactType": {
+                "schemaTitle": "google.VertexEndpoint",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "gcp_resources": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-model-deploy": {
+        "executorLabel": "exec-model-deploy",
+        "inputDefinitions": {
+          "artifacts": {
+            "endpoint": {
+              "artifactType": {
+                "schemaTitle": "google.VertexEndpoint",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "model": {
+              "artifactType": {
+                "schemaTitle": "google.VertexModel",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "automatic_resources_max_replica_count": {
+              "type": "INT"
+            },
+            "automatic_resources_min_replica_count": {
+              "type": "INT"
+            },
+            "dedicated_resources_accelerator_count": {
+              "type": "INT"
+            },
+            "dedicated_resources_accelerator_type": {
+              "type": "STRING"
+            },
+            "dedicated_resources_machine_type": {
+              "type": "STRING"
+            },
+            "dedicated_resources_max_replica_count": {
+              "type": "INT"
+            },
+            "dedicated_resources_min_replica_count": {
+              "type": "INT"
+            },
+            "deployed_model_display_name": {
+              "type": "STRING"
+            },
+            "disable_container_logging": {
+              "type": "STRING"
+            },
+            "enable_access_logging": {
+              "type": "STRING"
+            },
+            "explanation_metadata": {
+              "type": "STRING"
+            },
+            "explanation_parameters": {
+              "type": "STRING"
+            },
+            "service_account": {
+              "type": "STRING"
+            },
+            "traffic_split": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "gcp_resources": {
+              "type": "STRING"
+            }
+          }
+        }
+      }
+    },
+    "deploymentSpec": {
+      "executors": {
+        "exec-build-base-output-dir": {
+          "container": {
+            "args": [
+              "--output-bucket",
+              "{{$.inputs.parameters['output_bucket']}}",
+              "--pipeline-identifier",
+              "{{$.inputs.parameters['pipeline_identifier']}}",
+              "----output-paths",
+              "{{$.outputs.parameters['Output'].output_file}}"
+            ],
+            "command": [
+              "sh",
+              "-ec",
+              "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+              "def build_base_output_dir(output_bucket, pipeline_identifier):\n    return f\"{output_bucket}/{pipeline_identifier}/\"\n\ndef _serialize_str(str_value: str) -> str:\n    if not isinstance(str_value, str):\n        raise TypeError('Value \"{}\" has type \"{}\" instead of str.'.format(\n            str(str_value), str(type(str_value))))\n    return str_value\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Build base output dir', description='')\n_parser.add_argument(\"--output-bucket\", dest=\"output_bucket\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--pipeline-identifier\", dest=\"pipeline_identifier\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"----output-paths\", dest=\"_output_paths\", type=str, nargs=1)\n_parsed_args = vars(_parser.parse_args())\n_output_files = _parsed_args.pop(\"_output_paths\", [])\n\n_outputs = build_base_output_dir(**_parsed_args)\n\n_outputs = [_outputs]\n\n_output_serializers = [\n    _serialize_str,\n\n]\n\nimport os\nfor idx, output_file in enumerate(_output_files):\n    try:\n        os.makedirs(os.path.dirname(output_file))\n    except OSError:\n        pass\n    with open(output_file, 'w') as f:\n        f.write(_output_serializers[idx](_outputs[idx]))\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-build-model-description": {
+          "container": {
+            "args": [
+              "--pipeline-identifier",
+              "{{$.inputs.parameters['pipeline_identifier']}}",
+              "--train-script-args",
+              "{{$.inputs.parameters['train_script_args']}}",
+              "----output-paths",
+              "{{$.outputs.parameters['Output'].output_file}}"
+            ],
+            "command": [
+              "sh",
+              "-ec",
+              "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+              "def build_model_description(pipeline_identifier, train_script_args):\n    return f\"StableDiffusion Dreambooth fine-tuned with pipeline_identifier {pipeline_identifier}. Training script args: {train_script_args}\"\n\ndef _serialize_str(str_value: str) -> str:\n    if not isinstance(str_value, str):\n        raise TypeError('Value \"{}\" has type \"{}\" instead of str.'.format(\n            str(str_value), str(type(str_value))))\n    return str_value\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Build model description', description='')\n_parser.add_argument(\"--pipeline-identifier\", dest=\"pipeline_identifier\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--train-script-args\", dest=\"train_script_args\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"----output-paths\", dest=\"_output_paths\", type=str, nargs=1)\n_parsed_args = vars(_parser.parse_args())\n_output_files = _parsed_args.pop(\"_output_paths\", [])\n\n_outputs = build_model_description(**_parsed_args)\n\n_outputs = [_outputs]\n\n_output_serializers = [\n    _serialize_str,\n\n]\n\nimport os\nfor idx, output_file in enumerate(_output_files):\n    try:\n        os.makedirs(os.path.dirname(output_file))\n    except OSError:\n        pass\n    with open(output_file, 'w') as f:\n        f.write(_output_serializers[idx](_outputs[idx]))\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-build-serving-env": {
+          "container": {
+            "args": [
+              "--project-id",
+              "{{$.inputs.parameters['project_id']}}",
+              "--serving-output-bucket",
+              "{{$.inputs.parameters['serving_output_bucket']}}",
+              "--base-output-dir",
+              "{{$.inputs.parameters['base_output_dir']}}",
+              "----output-paths",
+              "{{$.outputs.parameters['Output'].output_file}}"
+            ],
+            "command": [
+              "sh",
+              "-ec",
+              "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+              "def build_serving_env(project_id, serving_output_bucket, base_output_dir):\n    import json\n    return json.dumps({\n        \"PROJECT_ID\": project_id,\n        \"BUCKET\": serving_output_bucket,\n        \"MODELS_PATH\": \"models\",\n        \"GCS_MODEL_PATH\": f\"{base_output_dir}/model\"\n    })\n\ndef _serialize_str(str_value: str) -> str:\n    if not isinstance(str_value, str):\n        raise TypeError('Value \"{}\" has type \"{}\" instead of str.'.format(\n            str(str_value), str(type(str_value))))\n    return str_value\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Build serving env', description='')\n_parser.add_argument(\"--project-id\", dest=\"project_id\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--serving-output-bucket\", dest=\"serving_output_bucket\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--base-output-dir\", dest=\"base_output_dir\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"----output-paths\", dest=\"_output_paths\", type=str, nargs=1)\n_parsed_args = vars(_parser.parse_args())\n_output_files = _parsed_args.pop(\"_output_paths\", [])\n\n_outputs = build_serving_env(**_parsed_args)\n\n_outputs = [_outputs]\n\n_output_serializers = [\n    _serialize_str,\n\n]\n\nimport os\nfor idx, output_file in enumerate(_output_files):\n    try:\n        os.makedirs(os.path.dirname(output_file))\n    except OSError:\n        pass\n    with open(output_file, 'w') as f:\n        f.write(_output_serializers[idx](_outputs[idx]))\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-build-training-env": {
+          "container": {
+            "args": [
+              "--input-bucket",
+              "{{$.inputs.parameters['input_bucket']}}",
+              "--access-token",
+              "{{$.inputs.parameters['access_token']}}",
+              "--accelerate-args",
+              "{{$.inputs.parameters['accelerate_args']}}",
+              "--train-script",
+              "{{$.inputs.parameters['train_script']}}",
+              "--train-script-args",
+              "{{$.inputs.parameters['train_script_args']}}",
+              "--project-id",
+              "{{$.inputs.parameters['project_id']}}",
+              "----output-paths",
+              "{{$.outputs.parameters['Output'].output_file}}"
+            ],
+            "command": [
+              "sh",
+              "-ec",
+              "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+              "def build_training_env(input_bucket, access_token, accelerate_args, train_script,\n                       train_script_args, project_id):\n    import json\n    return json.dumps({\n        \"INPUT_BUCKET\": input_bucket,\n        \"ACCESS_TOKEN\": access_token,\n        \"ACCELERATE_ARGS\": accelerate_args.strip('\\''),\n        \"TRAIN_SCRIPT\": train_script,\n        \"TRAIN_SCRIPT_ARGS\": train_script_args.strip('\\''),\n        \"PROJECT_ID\": project_id,\n    })\n\ndef _serialize_str(str_value: str) -> str:\n    if not isinstance(str_value, str):\n        raise TypeError('Value \"{}\" has type \"{}\" instead of str.'.format(\n            str(str_value), str(type(str_value))))\n    return str_value\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Build training env', description='')\n_parser.add_argument(\"--input-bucket\", dest=\"input_bucket\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--access-token\", dest=\"access_token\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--accelerate-args\", dest=\"accelerate_args\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--train-script\", dest=\"train_script\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--train-script-args\", dest=\"train_script_args\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--project-id\", dest=\"project_id\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"----output-paths\", dest=\"_output_paths\", type=str, nargs=1)\n_parsed_args = vars(_parser.parse_args())\n_output_files = _parsed_args.pop(\"_output_paths\", [])\n\n_outputs = build_training_env(**_parsed_args)\n\n_outputs = [_outputs]\n\n_output_serializers = [\n    _serialize_str,\n\n]\n\nimport os\nfor idx, output_file in enumerate(_output_files):\n    try:\n        os.makedirs(os.path.dirname(output_file))\n    except OSError:\n        pass\n    with open(output_file, 'w') as f:\n        f.write(_output_serializers[idx](_outputs[idx]))\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-customcontainertrainingjob-run": {
+          "container": {
+            "args": [
+              "--init.model_serving_container_predict_route",
+              "/txt2img",
+              "--init.model_serving_container_health_route",
+              "/healthz",
+              "--method.replica_count",
+              "1",
+              "--method.boot_disk_type",
+              "pd-ssd",
+              "--method.boot_disk_size_gb",
+              "100",
+              "--method.is_default_version",
+              "True",
+              "--executor_input",
+              "{{$}}",
+              "--resource_name_output_artifact_uri",
+              "{{$.outputs.artifacts['model'].uri}}",
+              "--init.display_name",
+              "{{$.inputs.parameters['display_name']}}",
+              "--init.container_uri",
+              "{{$.inputs.parameters['container_uri']}}",
+              "--method.environment_variables",
+              "{{$.inputs.parameters['environment_variables']}}",
+              "--method.service_account",
+              "{{$.inputs.parameters['service_account']}}",
+              "--method.machine_type",
+              "{{$.inputs.parameters['machine_type']}}",
+              "--method.accelerator_type",
+              "{{$.inputs.parameters['accelerator_type']}}",
+              "--method.accelerator_count",
+              "{{$.inputs.parameters['accelerator_count']}}",
+              "--method.base_output_dir",
+              "{{$.inputs.parameters['base_output_dir']}}",
+              "--init.location",
+              "{{$.inputs.parameters['location']}}",
+              "--method.model_display_name",
+              "{{$.inputs.parameters['model_display_name']}}",
+              "--init.model_serving_container_image_uri",
+              "{{$.inputs.parameters['model_serving_container_image_uri']}}",
+              "--init.model_serving_container_command",
+              "{{$.inputs.parameters['model_serving_container_command']}}",
+              "--init.model_serving_container_environment_variables",
+              "{{$.inputs.parameters['model_serving_container_environment_variables']}}",
+              "--init.model_serving_container_ports",
+              "{{$.inputs.parameters['model_serving_container_ports']}}",
+              "--init.model_description",
+              "{{$.inputs.parameters['model_description']}}",
+              "--method.model_version_description",
+              "{{$.inputs.parameters['model_version_description']}}",
+              "--init.staging_bucket",
+              "{{$.inputs.parameters['staging_bucket']}}"
+            ],
+            "command": [
+              "python3",
+              "-m",
+              "google_cloud_pipeline_components.container.aiplatform.remote_runner",
+              "--cls_name",
+              "CustomContainerTrainingJob",
+              "--method_name",
+              "run"
+            ],
+            "image": "gcr.io/ml-pipeline/google-cloud-pipeline-components:1.0.27"
+          }
+        },
+        "exec-endpoint-create": {
+          "container": {
+            "args": [
+              "--type",
+              "CreateEndpoint",
+              "--payload",
+              "{\"display_name\": \"{{$.inputs.parameters['display_name']}}\", \"description\": \"{{$.inputs.parameters['description']}}\", \"labels\": {{$.inputs.parameters['labels']}}, \"encryption_spec\": {\"kms_key_name\":\"{{$.inputs.parameters['encryption_spec_key_name']}}\"}, \"network\": \"{{$.inputs.parameters['network']}}\"}",
+              "--project",
+              "{{$.inputs.parameters['project']}}",
+              "--location",
+              "{{$.inputs.parameters['location']}}",
+              "--gcp_resources",
+              "{{$.outputs.parameters['gcp_resources'].output_file}}",
+              "--executor_input",
+              "{{$}}"
+            ],
+            "command": [
+              "python3",
+              "-u",
+              "-m",
+              "google_cloud_pipeline_components.container.v1.endpoint.create_endpoint.launcher"
+            ],
+            "image": "gcr.io/ml-pipeline/google-cloud-pipeline-components:1.0.27"
+          }
+        },
+        "exec-model-deploy": {
+          "container": {
+            "args": [
+              "--type",
+              "DeployModel",
+              "--payload",
+              "{\"endpoint\": \"{{$.inputs.artifacts['endpoint'].metadata['resourceName']}}\", \"traffic_split\": {{$.inputs.parameters['traffic_split']}}, \"deployed_model\": {\"model\": \"{{$.inputs.artifacts['model'].metadata['resourceName']}}\", \"dedicated_resources\": {\"machine_spec\": {\"machine_type\": \"{{$.inputs.parameters['dedicated_resources_machine_type']}}\", \"accelerator_type\": \"{{$.inputs.parameters['dedicated_resources_accelerator_type']}}\", \"accelerator_count\": {{$.inputs.parameters['dedicated_resources_accelerator_count']}}}, \"min_replica_count\": {{$.inputs.parameters['dedicated_resources_min_replica_count']}}, \"max_replica_count\": {{$.inputs.parameters['dedicated_resources_max_replica_count']}}}, \"automatic_resources\": {\"min_replica_count\": {{$.inputs.parameters['automatic_resources_min_replica_count']}}, \"max_replica_count\": {{$.inputs.parameters['automatic_resources_max_replica_count']}}}, \"service_account\": \"{{$.inputs.parameters['service_account']}}\", \"disable_container_logging\": {{$.inputs.parameters['disable_container_logging']}}, \"enable_access_logging\": {{$.inputs.parameters['enable_access_logging']}}, \"explanation_spec\": {\"parameters\": {{$.inputs.parameters['explanation_parameters']}}, \"metadata\": {{$.inputs.parameters['explanation_metadata']}}}}}",
+              "--project",
+              "",
+              "--location",
+              "",
+              "--gcp_resources",
+              "{{$.outputs.parameters['gcp_resources'].output_file}}"
+            ],
+            "command": [
+              "python3",
+              "-u",
+              "-m",
+              "google_cloud_pipeline_components.container.v1.endpoint.deploy_model.launcher"
+            ],
+            "image": "gcr.io/ml-pipeline/google-cloud-pipeline-components:1.0.27"
+          }
+        }
+      }
+    },
+    "pipelineInfo": {
+      "name": "stablediffusion-dreambooth"
+    },
+    "root": {
+      "dag": {
+        "tasks": {
+          "build-base-output-dir": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-build-base-output-dir"
+            },
+            "inputs": {
+              "parameters": {
+                "output_bucket": {
+                  "componentInputParameter": "output_bucket"
+                },
+                "pipeline_identifier": {
+                  "componentInputParameter": "pipeline_identifier"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "build-base-output-dir"
+            }
+          },
+          "build-model-description": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-build-model-description"
+            },
+            "inputs": {
+              "parameters": {
+                "pipeline_identifier": {
+                  "componentInputParameter": "pipeline_identifier"
+                },
+                "train_script_args": {
+                  "componentInputParameter": "train_script_args"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "build-model-description"
+            }
+          },
+          "build-serving-env": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-build-serving-env"
+            },
+            "dependentTasks": [
+              "build-base-output-dir"
+            ],
+            "inputs": {
+              "parameters": {
+                "base_output_dir": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-base-output-dir"
+                  }
+                },
+                "project_id": {
+                  "componentInputParameter": "project_id"
+                },
+                "serving_output_bucket": {
+                  "componentInputParameter": "serving_output_bucket"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "build-serving-env"
+            }
+          },
+          "build-training-env": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-build-training-env"
+            },
+            "inputs": {
+              "parameters": {
+                "accelerate_args": {
+                  "componentInputParameter": "accelerate_args"
+                },
+                "access_token": {
+                  "componentInputParameter": "access_token"
+                },
+                "input_bucket": {
+                  "componentInputParameter": "input_bucket"
+                },
+                "project_id": {
+                  "componentInputParameter": "project_id"
+                },
+                "train_script": {
+                  "componentInputParameter": "train_script"
+                },
+                "train_script_args": {
+                  "componentInputParameter": "train_script_args"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "build-training-env"
+            }
+          },
+          "customcontainertrainingjob-run": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-customcontainertrainingjob-run"
+            },
+            "dependentTasks": [
+              "build-base-output-dir",
+              "build-model-description",
+              "build-serving-env",
+              "build-training-env"
+            ],
+            "inputs": {
+              "parameters": {
+                "accelerator_count": {
+                  "componentInputParameter": "training_accelerator_count"
+                },
+                "accelerator_type": {
+                  "componentInputParameter": "training_accelerator_type"
+                },
+                "base_output_dir": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-base-output-dir"
+                  }
+                },
+                "container_uri": {
+                  "componentInputParameter": "training_container_uri"
+                },
+                "display_name": {
+                  "componentInputParameter": "pipeline_identifier"
+                },
+                "environment_variables": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-training-env"
+                  }
+                },
+                "location": {
+                  "componentInputParameter": "location"
+                },
+                "machine_type": {
+                  "componentInputParameter": "training_machine_type"
+                },
+                "model_description": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-model-description"
+                  }
+                },
+                "model_display_name": {
+                  "componentInputParameter": "pipeline_identifier"
+                },
+                "model_serving_container_command": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[]"
+                    }
+                  }
+                },
+                "model_serving_container_environment_variables": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-serving-env"
+                  }
+                },
+                "model_serving_container_image_uri": {
+                  "componentInputParameter": "serving_container_uri"
+                },
+                "model_serving_container_ports": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[3000]"
+                    }
+                  }
+                },
+                "model_version_description": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "build-model-description"
+                  }
+                },
+                "service_account": {
+                  "componentInputParameter": "service_account"
+                },
+                "staging_bucket": {
+                  "componentInputParameter": "staging_bucket"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "customcontainertrainingjob-run"
+            }
+          },
+          "endpoint-create": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-endpoint-create"
+            },
+            "inputs": {
+              "parameters": {
+                "description": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": ""
+                    }
+                  }
+                },
+                "display_name": {
+                  "componentInputParameter": "pipeline_identifier"
+                },
+                "encryption_spec_key_name": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": ""
+                    }
+                  }
+                },
+                "labels": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "{}"
+                    }
+                  }
+                },
+                "location": {
+                  "componentInputParameter": "location"
+                },
+                "network": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": ""
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project_id"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "endpoint-create"
+            }
+          },
+          "model-deploy": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-model-deploy"
+            },
+            "dependentTasks": [
+              "customcontainertrainingjob-run",
+              "endpoint-create"
+            ],
+            "inputs": {
+              "artifacts": {
+                "endpoint": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "endpoint",
+                    "producerTask": "endpoint-create"
+                  }
+                },
+                "model": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "model",
+                    "producerTask": "customcontainertrainingjob-run"
+                  }
+                }
+              },
+              "parameters": {
+                "automatic_resources_max_replica_count": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "0"
+                    }
+                  }
+                },
+                "automatic_resources_min_replica_count": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "0"
+                    }
+                  }
+                },
+                "dedicated_resources_accelerator_count": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "1"
+                    }
+                  }
+                },
+                "dedicated_resources_accelerator_type": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "NVIDIA_TESLA_T4"
+                    }
+                  }
+                },
+                "dedicated_resources_machine_type": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "n1-standard-4"
+                    }
+                  }
+                },
+                "dedicated_resources_max_replica_count": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "1"
+                    }
+                  }
+                },
+                "dedicated_resources_min_replica_count": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "1"
+                    }
+                  }
+                },
+                "deployed_model_display_name": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": ""
+                    }
+                  }
+                },
+                "disable_container_logging": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "0"
+                    }
+                  }
+                },
+                "enable_access_logging": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "0"
+                    }
+                  }
+                },
+                "explanation_metadata": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "{}"
+                    }
+                  }
+                },
+                "explanation_parameters": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "{}"
+                    }
+                  }
+                },
+                "service_account": {
+                  "componentInputParameter": "serving_service_account"
+                },
+                "traffic_split": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "{}"
+                    }
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "model-deploy"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "parameters": {
+          "accelerate_args": {
+            "type": "STRING"
+          },
+          "access_token": {
+            "type": "STRING"
+          },
+          "input_bucket": {
+            "type": "STRING"
+          },
+          "location": {
+            "type": "STRING"
+          },
+          "output_bucket": {
+            "type": "STRING"
+          },
+          "parent_model": {
+            "type": "STRING"
+          },
+          "pipeline_identifier": {
+            "type": "STRING"
+          },
+          "project_id": {
+            "type": "STRING"
+          },
+          "service_account": {
+            "type": "STRING"
+          },
+          "serving_container_uri": {
+            "type": "STRING"
+          },
+          "serving_output_bucket": {
+            "type": "STRING"
+          },
+          "serving_service_account": {
+            "type": "STRING"
+          },
+          "staging_bucket": {
+            "type": "STRING"
+          },
+          "train_script": {
+            "type": "STRING"
+          },
+          "train_script_args": {
+            "type": "STRING"
+          },
+          "training_accelerator_count": {
+            "type": "INT"
+          },
+          "training_accelerator_type": {
+            "type": "STRING"
+          },
+          "training_container_uri": {
+            "type": "STRING"
+          },
+          "training_machine_type": {
+            "type": "STRING"
+          }
+        }
+      }
+    },
+    "schemaVersion": "2.0.0",
+    "sdkVersion": "kfp-1.8.16"
+  },
+  "runtimeConfig": {}
+}

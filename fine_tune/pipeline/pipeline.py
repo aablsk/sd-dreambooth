@@ -126,6 +126,7 @@ def stablediffusion_dreambooth_pipeline(
         boot_disk_type="pd-ssd",
         boot_disk_size_gb=100,
         base_output_dir=base_output_dir,
+        location=location,
         # resulting model
         model_display_name=pipeline_identifier,
         model_serving_container_image_uri=serving_container_uri,

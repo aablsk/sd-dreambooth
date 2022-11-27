@@ -27,13 +27,13 @@ def get_bucket_last_changed_timestamp(bucket_uri: str):
         last_updated = blob.updated if last_updated == None or blob.updated > last_updated else last_updated
     return last_updated
 
-def getpipeline_identifier():
+def get_pipeline_identifier():
     def clean_str(string: str):
         return re.sub(r'[^A-Za-z0-9\_\-]', '', string)
     return f'finetune-sd-db-{input_bucket.split("/")[2]}-{clean_str(instance_prompt)}-{clean_str(class_prompt)}'
 
 def render_train_script_args(instance_prompt=str,
-                             pretrained_model_name: str = 'CompVis/stable-diffusion-v1-5',
+                             pretrained_model_name: str = 'CompVis/stable-diffusion-v1-4',
                              resolution: int = 512,
                              train_batch_size: int = 1,
                              learning_rate: float = 5e-6,
@@ -92,11 +92,12 @@ train_script_args = render_train_script_args(
 )
 
 aiplatform.init(project=project_id, location=location)
+pipeline_identifier=get_pipeline_identifier()
 
 # TODO: expose more train_dreambooth.py args
 # TODO: consider better strategy for pipeline, job and model identifiers
 job = aiplatform.PipelineJob(
-    display_name=f'pipeline_identifier-{dt.now().strftime("%Y_%m_%d__%H_%M_%S")}',
+    display_name=f'{pipeline_identifier}-{dt.now().strftime("%Y_%m_%d__%H_%M_%S")}',
     #template_path=f'gs://vertexai_pipeline_definition_{project_id}/stablediffusion_dreambooth_pipeline.json',
     template_path='stablediffusion_dreambooth_pipeline.json',
     parameter_values={
