@@ -165,7 +165,8 @@ class StableDiffusionRunnable(bentoml.Runnable):
                 generator=generator,
             ).images
             image = images[0]
-            return image
+            link = self.upload_to_gcs(image, prompt)
+            return link
         
     def upload_to_gcs(self, image, prompt):
         bucket = self.storage_client.get_bucket(os.environ['BUCKET'])
@@ -207,10 +208,9 @@ def txt2img(data, context):
     print(data.get('prompt')) # TODO: remove these debug log statements
     print(str(data)) # TODO: remove these debug log statements
     prompt = data.get('prompt')
-    image = stable_diffusion_runner.txt2img.run(data)
+    link = stable_diffusion_runner.txt2img.run(data)
     for i in data:
         context.response.headers.append(i, str(data[i]))
-    link = stable_diffusion_runner.upload_to_gcs(image, prompt)
     return {'predictions': [{'link': link}]}
 
 class Img2ImgInput(BaseModel):
