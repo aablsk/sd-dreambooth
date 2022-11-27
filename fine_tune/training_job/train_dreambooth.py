@@ -3,6 +3,8 @@ import hashlib
 import itertools
 import math
 import os
+import re
+import glob
 from pathlib import Path
 from typing import Optional
 
@@ -327,20 +329,19 @@ def get_full_repo_name(model_id: str, organization: Optional[str] = None, token:
         return f"{organization}/{model_id}"
 
 def download_input_data(storage_client: storage.Client, remote_files_path: str, local_files_path: str):
-    matches = re.match("gs://(.*?)/(.*)", remote_model_path)
-    bucket_name, gcs_folder_name = matches.groups()
+    bucket_name = remote_files_path.split("/")[2]
+    print(bucket_name)
     bucket = storage_client.get_bucket(bucket_name=bucket_name)
-    blobs = bucket.list_blobs(prefix=gcs_folder_name)  # Get list of files
+    blobs = bucket.list_blobs()  # Get list of files
     for blob in blobs:
         if blob.name.endswith("/"):
             continue
         file_path = local_files_path + "/" + blob.name.split("/")[-1]
         print(f"downloading {blob.name} to {file_path}")
         blob.download_to_filename(file_path)
-    return f"{local_model_path}/{gcs_folder_name}"
 
 def upload_model(storage_client: storage.Client, local_directory: str, gcs_folder: str):
-    matches = re.match("gs://(.*?)/(.*)", remote_model_path)
+    matches = re.match("gs://(.*?)/(.*)", gcs_folder)
     bucket_name, gcs_folder_name = matches.groups()
     rel_paths = glob.glob(local_directory + '/**', recursive=True)
     bucket = storage_client.bucket(bucket_name=bucket_name)
@@ -348,13 +349,14 @@ def upload_model(storage_client: storage.Client, local_directory: str, gcs_folde
         remote_path = f'{gcs_folder}/{"/".join(local_file.split(os.sep)[1:])}'
         if os.path.isfile(local_file):
             blob = bucket.blob(remote_path)
+            print(f"uploading {local_file} to {remote_path}")
             blob.upload_from_filename(local_file)
 
 def main(args):
     logging_dir = Path(args.output_dir, args.logging_dir)
 
     # download instance images
-    storage_client = storage.Client()
+    storage_client = storage.Client(project=os.environ["PROJECT_ID"])
     download_input_data(storage_client=storage_client, remote_files_path=os.environ["INPUT_BUCKET"], local_files_path="instance-images")
     upload_model(storage_client=storage_client, local_directory="instance-images", gcs_folder=os.environ["AIP_MODEL_DIR"])
 
