@@ -23,10 +23,10 @@ class StableDiffusionRunnable(bentoml.Runnable):
     SUPPORTS_CPU_MULTI_THREADING = True
 
     def __init__(self):  
-        self.storage_client = storage.Client()
+        self.storage_client = storage.Client(project=os.environ['PROJECT_ID'])
         model_id = None
         try:
-            model_id = self.download_model(remote_model_path=os.environ['AIP_STORAGE_URI'], local_model_path=os.environ['MODELS_PATH'])
+            model_id = self.download_model(remote_model_path=os.environ['GCS_MODEL_PATH'], local_model_path=os.environ['MODELS_PATH'])
         except Exception as e:
             print(e)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -168,7 +168,6 @@ class StableDiffusionRunnable(bentoml.Runnable):
             return image
         
     def upload_to_gcs(self, image, prompt):
-        self.storage_client = storage.Client(os.environ['PROJECT_ID'])
         bucket = self.storage_client.get_bucket(os.environ['BUCKET'])
         blob_name = str(datetime.now().microsecond) + prompt + '.png'
         blob = bucket.blob(blob_name)
