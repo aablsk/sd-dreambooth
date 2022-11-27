@@ -6,3 +6,4 @@ ftfy
 tensorboard
 modelcards
 bitsandbytes
+google-cloud-storage
