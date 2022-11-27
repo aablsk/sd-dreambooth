@@ -26,6 +26,10 @@ module "project-iam-bindings" {
     ],
     "roles/aiplatform.admin" = [
         "serviceAccount:${google_service_account.vertexai_training.email}", # TODO: determine and assign minimal permissions
+    ],
+    "roles/storage.admin" = [
+        "serviceAccount:${google_service_account.vertexai_training.email}", # TODO: determine and assign minimal permissions
+        "serviceAccount:${google_service_account.vertexai_prediction.email}" # TODO: determine and assign minimal permissions
     ]
   }
 }
