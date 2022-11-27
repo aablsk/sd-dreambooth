@@ -23,12 +23,12 @@ class StableDiffusionRunnable(bentoml.Runnable):
     SUPPORTS_CPU_MULTI_THREADING = True
 
     def __init__(self):  
-        self.storage_client = storage.Client(project=os.environ['PROJECT_ID'])
+        self.storage_client = storage.Client()
+        model_id = None
         try:
             model_id = self.download_model(remote_model_path=os.environ['AIP_STORAGE_URI'], local_model_path=os.environ['MODELS_PATH'])
         except Exception as e:
             print(e)
-        print(model_id)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         txt2img_pipe = StableDiffusionPipeline.from_pretrained(model_id)
