@@ -26,6 +26,7 @@ instance_prompt = "photo of sks dog"
 class_prompt = "photo of dog"
 # TODO: get this from secret manager instead
 access_token = os.environ['ACCESS_TOKEN']
+training_service_account = f'vertexai-training@{project_id}.iam.gserviceaccount.com'
 
 aiplatform.init(project=project_id, location=location)
 
@@ -90,6 +91,7 @@ train_script_args = render_train_script_args(instance_prompt=instance_prompt, cl
 def clean_str(string: str):
     return re.sub(r'[^A-Za-z0-9\_\-]', '', string)
 
+
 pipeline_identifier = f'finetune-sd-db-{input_bucket.split("/")[2]}-{clean_str(instance_prompt)}-{clean_str(class_prompt)}'
 
 # TODO: expose more train_dreambooth.py args
@@ -101,14 +103,19 @@ job = aiplatform.PipelineJob(
     template_path='stablediffusion_dreambooth_pipeline.json',
     pipeline_root=f'gs://vertexai_pipeline_staging_{project_id}',
     parameter_values={
-        'project_id': project_id,
-        'location': location,
-        'pipeline_identifier': f'{pipeline_identifier}-{get_bucket_last_changed_timestamp(input_bucket).strftime("%Y_%m_%d__%H_%M_%S")}',
+        'project_id':
+            project_id,
+        'location':
+            location,
+        'pipeline_identifier':
+            f'{pipeline_identifier}-{get_bucket_last_changed_timestamp(input_bucket).strftime("%Y_%m_%d__%H_%M_%S")}',
         # training
         'training_container_uri':
             f'{location}-docker.pkg.dev/{project_id}/stablediffusion-dreambooth/finetune-16gb-prebuilt:latest',
-        'accelerate_args': '--config_file=accelerate_config.yaml',
-        'train_script': 'train_dreambooth.py',
+        'accelerate_args':
+            '--config_file=accelerate_config.yaml',
+        'train_script':
+            'train_dreambooth.py',
         'train_script_args':
             train_script_args,
         'input_bucket':
@@ -118,7 +125,7 @@ job = aiplatform.PipelineJob(
         'access_token':
             access_token,
         'service_account':
-            f'vertexai-training@{project_id}.iam.gserviceaccount.com',
+            training_service_account,
         'training_machine_type':
             'n1-standard-8',
         'training_accelerator_type':
@@ -126,7 +133,8 @@ job = aiplatform.PipelineJob(
         'training_accelerator_count':
             1,
         # resulting model & serving
-        'parent_model': f'stablediffusion-dreambooth-{input_bucket.split("/")[2]}',
+        'parent_model':
+            f'stablediffusion-dreambooth-{input_bucket.split("/")[2]}',
         'serving_container_uri':
             f'{location}-docker.pkg.dev/{project_id}/stablediffusion-dreambooth/bentoml-server-no-model:latest',
         'serving_output_bucket':
@@ -138,4 +146,4 @@ job = aiplatform.PipelineJob(
     location=location,
 )
 
-# job.submit(service_account=training_service_account)
+job.submit(service_account=training_service_account)

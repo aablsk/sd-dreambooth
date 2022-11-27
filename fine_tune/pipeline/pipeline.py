@@ -41,9 +41,9 @@ def build_training_env(input_bucket: str, access_token: str, accelerate_args: st
     return json.dumps({
         "INPUT_BUCKET": input_bucket,
         "ACCESS_TOKEN": access_token,
-        "ACCELERATE_ARGS": accelerate_args,
+        "ACCELERATE_ARGS": f"{accelerate_args}",
         "TRAIN_SCRIPT": train_script,
-        "TRAIN_SCRIPT_ARGS": train_script_args
+        "TRAIN_SCRIPT_ARGS": f"{train_script_args}"
     })
 
 
