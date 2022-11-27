@@ -24,6 +24,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 RUN mkdir ./instance-images
+RUN mkdir ./output
 
 COPY accelerate_config.yaml .
 COPY train_dreambooth.py .

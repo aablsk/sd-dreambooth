@@ -21,6 +21,7 @@ from PIL import Image
 from torchvision import transforms
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
+from gcloud import storage
 
 
 logger = get_logger(__name__)
@@ -196,7 +197,6 @@ def parse_args(input_args=None):
         ),
     )
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
-    parser.add_argument("--access_token", type=str, default=None, help="Hugging Face access token to download model weights")
 
     if input_args is not None:
         args = parser.parse_args(input_args)
@@ -326,9 +326,37 @@ def get_full_repo_name(model_id: str, organization: Optional[str] = None, token:
     else:
         return f"{organization}/{model_id}"
 
+def download_input_data(storage_client: storage.Client, remote_files_path: str, local_files_path: str):
+    matches = re.match("gs://(.*?)/(.*)", remote_model_path)
+    bucket_name, gcs_folder_name = matches.groups()
+    bucket = storage_client.get_bucket(bucket_name=bucket_name)
+    blobs = bucket.list_blobs(prefix=gcs_folder_name)  # Get list of files
+    for blob in blobs:
+        if blob.name.endswith("/"):
+            continue
+        file_path = local_files_path + "/" + blob.name.split("/")[-1]
+        print(f"downloading {blob.name} to {file_path}")
+        blob.download_to_filename(file_path)
+    return f"{local_model_path}/{gcs_folder_name}"
+
+def upload_model(storage_client: storage.Client, local_directory: str, gcs_folder: str):
+    matches = re.match("gs://(.*?)/(.*)", remote_model_path)
+    bucket_name, gcs_folder_name = matches.groups()
+    rel_paths = glob.glob(local_directory + '/**', recursive=True)
+    bucket = storage_client.bucket(bucket_name=bucket_name)
+    for local_file in rel_paths:
+        remote_path = f'{gcs_folder}/{"/".join(local_file.split(os.sep)[1:])}'
+        if os.path.isfile(local_file):
+            blob = bucket.blob(remote_path)
+            blob.upload_from_filename(local_file)
 
 def main(args):
     logging_dir = Path(args.output_dir, args.logging_dir)
+
+    # download instance images
+    storage_client = storage.Client()
+    download_input_data(storage_client=storage_client, remote_files_path=os.environ["INPUT_BUCKET"], local_files_path="instance-images")
+    upload_model(storage_client=storage_client, local_directory="instance-images", gcs_folder=os.environ["AIP_MODEL_DIR"])
 
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
@@ -355,7 +383,6 @@ def main(args):
             class_images_dir.mkdir(parents=True)
         cur_class_images = len(list(class_images_dir.iterdir()))
 
-        print(args.access_token)
         if cur_class_images < args.num_class_images:
             torch_dtype = torch.float16 if accelerator.device.type == "cuda" else torch.float32
             pipeline = StableDiffusionPipeline.from_pretrained(
@@ -363,7 +390,7 @@ def main(args):
                 torch_dtype=torch_dtype,
                 safety_checker=None,
                 revision=args.revision,
-                use_auth_token=args.access_token
+                use_auth_token=os.environ["ACCESS_TOKEN"]
             )
             pipeline.set_progress_bar_config(disable=True)
 
@@ -412,14 +439,14 @@ def main(args):
         tokenizer = CLIPTokenizer.from_pretrained(
             args.tokenizer_name,
             revision=args.revision,
-            use_auth_token=args.access_token
+            use_auth_token=os.environ["ACCESS_TOKEN"]
         )
     elif args.pretrained_model_name_or_path:
         tokenizer = CLIPTokenizer.from_pretrained(
             args.pretrained_model_name_or_path,
             subfolder="tokenizer",
             revision=args.revision,
-            use_auth_token=args.access_token
+            use_auth_token=os.environ["ACCESS_TOKEN"]
         )
 
     # Load models and create wrapper for stable diffusion
@@ -427,19 +454,19 @@ def main(args):
         args.pretrained_model_name_or_path,
         subfolder="text_encoder",
         revision=args.revision,
-        use_auth_token=args.access_token
+        use_auth_token=os.environ["ACCESS_TOKEN"]
     )
     vae = AutoencoderKL.from_pretrained(
         args.pretrained_model_name_or_path,
         subfolder="vae",
         revision=args.revision,
-        use_auth_token=args.access_token
+        use_auth_token=os.environ["ACCESS_TOKEN"]
     )
     unet = UNet2DConditionModel.from_pretrained(
         args.pretrained_model_name_or_path,
         subfolder="unet",
         revision=args.revision,
-        use_auth_token=args.access_token
+        use_auth_token=os.environ["ACCESS_TOKEN"]
     )
 
     vae.requires_grad_(False)
@@ -480,7 +507,7 @@ def main(args):
         eps=args.adam_epsilon,
     )
 
-    noise_scheduler = DDPMScheduler.from_config(args.pretrained_model_name_or_path, subfolder="scheduler", use_auth_token=args.access_token)
+    noise_scheduler = DDPMScheduler.from_config(args.pretrained_model_name_or_path, subfolder="scheduler", use_auth_token=os.environ["ACCESS_TOKEN"])
 
     train_dataset = DreamBoothDataset(
         instance_data_root=args.instance_data_dir,
@@ -662,9 +689,10 @@ def main(args):
             unet=accelerator.unwrap_model(unet),
             text_encoder=accelerator.unwrap_model(text_encoder),
             revision=args.revision,
-            use_auth_token=args.access_token    
+            use_auth_token=os.environ["ACCESS_TOKEN"]    
         )
         pipeline.save_pretrained(args.output_dir)
+        upload_model(storage_client, args.outputdir, os.environ["AIP_MODEL_DIR"])
 
         if args.push_to_hub:
             repo.push_to_hub(commit_message="End of training", blocking=False, auto_lfs_prune=True)
