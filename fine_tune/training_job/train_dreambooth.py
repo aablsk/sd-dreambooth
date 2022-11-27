@@ -358,8 +358,8 @@ def main(args):
     # download instance images
     storage_client = storage.Client(project=os.environ["PROJECT_ID"])
     download_input_data(storage_client=storage_client, remote_files_path=os.environ["INPUT_BUCKET"], local_files_path=args.instance_data_dir)
-    result_base_dir = os.environ["AIP_MODEL_DIR"].split("/")[:-1].join("/")
-    upload_directory(storage_client=storage_client, local_directory=args.instance_data_dir, gcs_folder=f'{result_base_dir}/instance-images')
+    result_base_dir = "/".join(os.environ["AIP_MODEL_DIR"].split("/")[:-2])
+    upload_directory(storage_client=storage_client, local_directory=args.instance_data_dir, gcs_folder=f'{result_base_dir}/instance-images/')
 
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
@@ -420,7 +420,7 @@ def main(args):
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
     
-    upload_directory(storage_client=storage_client, local_directory=args.class_data_dir, gcs_folder=f'{result_base_dir}/class-images')
+        upload_directory(storage_client=storage_client, local_directory=args.class_data_dir, gcs_folder=f'{result_base_dir}/class-images/')
 
     # Handle the repository creation
     if accelerator.is_main_process:
@@ -697,7 +697,7 @@ def main(args):
             use_auth_token=os.environ["ACCESS_TOKEN"]    
         )
         pipeline.save_pretrained(args.output_dir)
-        upload_directory(storage_client, args.outputdir, os.environ["AIP_MODEL_DIR"])
+        upload_directory(storage_client, args.output_dir, os.environ["AIP_MODEL_DIR"])
 
         if args.push_to_hub:
             repo.push_to_hub(commit_message="End of training", blocking=False, auto_lfs_prune=True)
