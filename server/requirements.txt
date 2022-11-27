@@ -5,3 +5,4 @@ diffusers
 ftfy
 pydantic
 gcloud
+accelerate

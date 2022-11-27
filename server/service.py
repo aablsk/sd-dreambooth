@@ -1,4 +1,5 @@
 from contextlib import ExitStack
+from pathlib import Path
 
 import torch
 from typing import List
@@ -15,13 +16,19 @@ from gcloud import storage
 import os
 from datetime import datetime
 import io
+import re
 
 class StableDiffusionRunnable(bentoml.Runnable):
     SUPPORTED_RESOURCES = ("nvidia.com/gpu", "cpu")
     SUPPORTS_CPU_MULTI_THREADING = True
 
-    def __init__(self):
-        model_id = os.environ['MODEL_PATH']
+    def __init__(self):  
+        self.storage_client = storage.Client(project=os.environ['PROJECT_ID'])
+        try:
+            model_id = self.download_model(remote_model_path=os.environ['AIP_STORAGE_URI'], local_model_path=os.environ['MODELS_PATH'])
+        except Exception as e:
+            print(e)
+        print(model_id)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         txt2img_pipe = StableDiffusionPipeline.from_pretrained(model_id)
@@ -47,6 +54,26 @@ class StableDiffusionRunnable(bentoml.Runnable):
             safety_checker=self.txt2img_pipe.safety_checker,
             feature_extractor=self.txt2img_pipe.feature_extractor,
         ).to(self.device)
+
+    def download_model(self, remote_model_path, local_model_path):
+        matches = re.match("gs://(.*?)/(.*)", remote_model_path)
+        bucket_name, gcs_folder_name = matches.groups()
+        print(bucket_name)
+        print(gcs_folder_name)
+        bucket = self.storage_client.get_bucket(bucket_name=bucket_name)
+        blobs = bucket.list_blobs(prefix=gcs_folder_name)  # Get list of files
+        for blob in blobs:
+            print(blob.name)
+            if blob.name.endswith("/"):
+                continue
+            file_split = blob.name.split("/")
+            directory = f"{local_model_path}/{'/'.join(file_split[0:-1])}"
+            Path(directory).mkdir(parents=True, exist_ok=True)
+            file_path = directory + "/" + file_split[-1:][0]
+            print(f"downloading {blob.name} to {file_path}")
+            blob.download_to_filename(file_path)
+        return f"{local_model_path}/{gcs_folder_name}"
+
 
     @bentoml.Runnable.method(batchable=False, batch_dim=0)
     def txt2img(self, data):
@@ -140,16 +167,15 @@ class StableDiffusionRunnable(bentoml.Runnable):
             image = images[0]
             return image
         
-def upload2gcs(image, prompt):
-    client = storage.Client(project=os.environ['PROJECT_ID'])
-    bucket = client.get_bucket(os.environ['BUCKET'])
-    blob_name = str(datetime.now().microsecond) + prompt + '.png'
-    blob = bucket.blob(blob_name)
-    link = 'https://storage.cloud.google.com/' + os.environ['BUCKET'] + '/' + blob_name
-    img_byte_arr = io.BytesIO()
-    image.save(img_byte_arr, format='PNG')
-    blob.upload_from_string(img_byte_arr.getvalue(), content_type='image/png')
-    return link
+    def upload_to_gcs(self, image, prompt):
+        bucket = self.storage_client.get_bucket(os.environ['BUCKET'])
+        blob_name = str(datetime.now().microsecond) + prompt + '.png'
+        blob = bucket.blob(blob_name)
+        link = 'https://storage.cloud.google.com/' + os.environ['BUCKET'] + '/' + blob_name
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='PNG')
+        blob.upload_from_string(img_byte_arr.getvalue(), content_type='image/png')
+        return link
 
 
 stable_diffusion_runner = bentoml.Runner(StableDiffusionRunnable, name='stable_diffusion_runner', max_batch_size=10)
@@ -184,7 +210,7 @@ def txt2img(data, context):
     image = stable_diffusion_runner.txt2img.run(data)
     for i in data:
         context.response.headers.append(i, str(data[i]))
-    link = upload2gcs(image, prompt)
+    link = stable_diffusion_runner.upload_to_gcs(image, prompt)
     return {'predictions': [{'link': link}]}
 
 class Img2ImgInput(BaseModel):
