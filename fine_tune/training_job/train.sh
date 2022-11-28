@@ -18,4 +18,4 @@ unset PYTHONPATH
 
 echo accelerate launch $ACCELERATE_ARGS $TRAIN_SCRIPT $TRAIN_SCRIPT_ARGS | bash
 
-gsutil -m cp -r output/* $AIP_MODEL_DIR
+gsutil -m cp -r output/* $AIP_MODEL_DIR # bandaid fix for train_dreambooth.py ln 701

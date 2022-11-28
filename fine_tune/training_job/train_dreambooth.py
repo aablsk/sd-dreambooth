@@ -698,7 +698,7 @@ def main(args):
         )
         pipeline.save_pretrained(args.output_dir)
         try:
-            upload_directory(storage_client, args.output_dir, os.environ["AIP_MODEL_DIR"])
+            upload_directory(storage_client, args.output_dir, os.environ["AIP_MODEL_DIR"]) # TODO: this seems to fail, not sure why, yet
         except Exception as e:
             print(e)
 
