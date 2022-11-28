@@ -697,7 +697,10 @@ def main(args):
             use_auth_token=os.environ["ACCESS_TOKEN"]    
         )
         pipeline.save_pretrained(args.output_dir)
-        upload_directory(storage_client, args.output_dir, os.environ["AIP_MODEL_DIR"])
+        try:
+            upload_directory(storage_client, args.output_dir, os.environ["AIP_MODEL_DIR"])
+        except Exception as e:
+            print(e)
 
         if args.push_to_hub:
             repo.push_to_hub(commit_message="End of training", blocking=False, auto_lfs_prune=True)
